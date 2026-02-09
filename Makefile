@@ -10,7 +10,7 @@ FLAGS  = -mcpu=cortex-m0plus -mthumb -O2  -DSTM32G031xx
 
 # 3. Пути к заголовочным файлам (INCLUDE)
 # Здесь мы говорим компилятору, где искать .h файлы CMSIS
-INCLUDES = -I./include -ID:\Projects\Embedded\CMSIS\CMSIS_6\CMSIS\Core\Include -ID:\Projects\Embedded\SCR_LIBS\cmsis-device-g0-master\Include
+INCLUDES = -I./include -ID:\Projects\CMSIS\Core\Include -ID:\Projects\cmsis-device-g0-master\Include -ID:\Projects\stm32g0xx-hal-driver-master\Inc
 
 C++FLAGS = $(FLAGS) $(INCLUDES) -std=c++20 -fno-exceptions
 CFLAGS   = $(FLAGS) $(INCLUDES)
