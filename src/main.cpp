@@ -3,6 +3,7 @@
 #include "stm32g0xx_ll_rcc.h"
 #include "stm32g0xx_ll_bus.h"
 #include "stm32g0xx_ll_gpio.h"
+#include "stm32g0xx_ll_tim.h"
 
 void delay(volatile uint32_t count) {
     while(count--) {
@@ -22,19 +23,34 @@ int main(void) {
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
     LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
-    
+
+    //настройка шим
+    //настройка тактирования всего
     LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);//включаем тактирование gpioa
-    // Установка режима (Input, Output, Alternate Function, Analog)
-    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_4, LL_GPIO_MODE_OUTPUT);
-    // Установка типа выхода (Push-Pull или Open-Drain)
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM14);//включаем тактирование таймера 2
+    //настройка таймеров 
+    LL_TIM_SetPrescaler(TIM14, 639);//настраиваем делитель частоты на таймер
+    LL_TIM_SetAutoReload(TIM14, 999);//устанвливает значение автоперезагрузки
+    LL_TIM_SetCounterMode(TIM14, LL_TIM_COUNTERMODE_UP);//устанавливаем счёт вверх 
+    //настраиваем пин 4 для показа значений на светодиоде
+    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_4, LL_GPIO_MODE_ALTERNATE);//настройка альтернативной функции
+    LL_GPIO_SetAFPin_0_7(GPIOA, LL_GPIO_PIN_4, LL_GPIO_AF_4);//настройка альтернативной функции 2 
+    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_4, LL_GPIO_SPEED_FREQ_LOW);
     LL_GPIO_SetPinOutputType(GPIOA, LL_GPIO_PIN_4, LL_GPIO_OUTPUT_PUSHPULL);
-    // Установка подтяжки (No Pull, Pull-up, Pull-down)
-    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_4, LL_GPIO_PULL_UP);
-    // Установка скорости (Low, Medium, High, Very High)
-    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_4, LL_GPIO_SPEED_FREQ_HIGH);
+    //настройка шим канала 1 
+    LL_TIM_OC_SetMode(TIM14, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_PWM1);
+    LL_TIM_OC_SetCompareCH1(TIM14, 500);
+    LL_TIM_CC_EnableChannel(TIM14, LL_TIM_CHANNEL_CH1);
+    LL_TIM_EnableCounter(TIM14); // Устанавливает бит CEN в TIM2_CR1
+    uint32_t brightness = 0;
+    int8_t step = 1;
+
     while(1) {
-        LL_GPIO_TogglePin(GPIOA, LL_GPIO_PIN_4);
-        // 5. Ждем. При 64 МГц значение 1 000 000 даст примерно 0.1-0.2 сек
-        delay(64000000);
+        LL_TIM_OC_SetCompareCH1(TIM14, brightness);
+        
+        brightness += step;
+        if (brightness >= 999 || brightness <= 0) step = -step;
+        
+        delay(10000); // Небольшая задержка, чтобы глаз успевал
     }
 }
