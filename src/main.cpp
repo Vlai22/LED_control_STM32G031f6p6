@@ -5,11 +5,25 @@
 #include "stm32g0xx_ll_gpio.h"
 #include "stm32g0xx_ll_tim.h"
 
-void delay(volatile uint32_t count) {
-    while(count--) {
-        __NOP(); // Пустая операция, чтобы компилятор не удалил цикл
-    }
-}
+uint16_t brig_lamp_1 = 0;
+bool onOff_lamp_1  = false;
+uint32_t time_dt_on_lamp_1 = 0;
+uint32_t time_dt_off_lamp_1 = 0;
+uint32_t time_dt_brig_lamp_1 = 0;
+uint16_t brig_lamp_2 = 0;
+bool onOff_lamp_2  = false;
+uint32_t time_dt_on_lamp_2 = 0;
+uint32_t time_dt_off_lamp_2 = 0;
+uint32_t time_dt_brig_lamp_2 = 0;
+uint16_t brig_lamp_R = 0;
+uint16_t brig_lamp_G = 0;
+uint16_t brig_lamp_B = 0;
+bool onOff_lamp_1  = false;
+uint32_t time_dt_on_lamp_1 = 0;
+uint32_t time_dt_off_lamp_1 = 0;
+uint32_t time_dt_brig_lamp_R = 0;
+uint32_t time_dt_brig_lamp_G = 0;
+uint32_t time_dt_brig_lamp_B = 0;
 int main(void) {
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
     while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2);
@@ -42,15 +56,6 @@ int main(void) {
     LL_TIM_OC_SetCompareCH1(TIM14, 500);
     LL_TIM_CC_EnableChannel(TIM14, LL_TIM_CHANNEL_CH1);
     LL_TIM_EnableCounter(TIM14); // Устанавливает бит CEN в TIM2_CR1
-    uint32_t brightness = 0;
-    int8_t step = 1;
-
     while(1) {
-        LL_TIM_OC_SetCompareCH1(TIM14, brightness);
-        
-        brightness += step;
-        if (brightness >= 999 || brightness <= 0) step = -step;
-        
-        delay(10000); // Небольшая задержка, чтобы глаз успевал
     }
 }
